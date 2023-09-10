@@ -5,19 +5,31 @@ pipeline {
             args '-u root'
         }
     }
-    environment {
-        POM_VERSION = ""
-    }
+
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'maven:3-alpine'
-                    args '-u root'
+        stage ('Compile Stage') {
+
+            steps {
+                withMaven(maven : 'maven') {
+                    sh 'mvn clean compile'
                 }
             }
+        }
+
+        stage ('Testing Stage') {
+
             steps {
-                sh "mvn package -Dmaven.test.skip=true"
+                withMaven(maven : 'maven') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage ('Deployment Stage') {
+            steps {
+                withMaven(maven : 'maven') {
+                    sh 'mvn deploy'
+                }
             }
         }
     }
